@@ -1,0 +1,333 @@
+/* style.css */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1e1e1e;
+  color: #ddd;
+}
+
+/* Make the overall app container a flex column that fills the viewport */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header#menu-bar #file-menu {
+  position: relative;
+}
+
+#file-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #444;
+  color: white;
+  border-radius: 5px;
+  display: none;
+  list-style-type: none;
+  padding: 0;
+  margin-top: 15px;
+  width: 100px;
+}
+
+#file-dropdown li {
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+}
+
+#file-dropdown li:hover {
+  background-color: #555;
+}
+
+/* Top Menu Bar - Set as drag region */
+#menu-bar {
+  background-color: #333;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-app-region: drag; /* Allow dragging */
+}
+
+.menu-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.menu-items li {
+  margin-right: 20px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  transition: background 0.3s;
+  -webkit-app-region: no-drag; /* Make menu items clickable */
+}
+
+.menu-items li:hover {
+  background-color: #444;
+}
+
+/* Custom Window Controls - Prevent dragging on buttons */
+#window-controls {
+  display: flex;
+}
+
+#window-controls button {
+  background: none;
+  border: none;
+  color: #ddd;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+  -webkit-app-region: no-drag; /* Make buttons clickable */
+}
+
+#window-controls button:hover {
+  background-color: #444;
+}
+
+/* Main Workspace takes remaining space */
+#workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left Tools Panel */
+#left-panel {
+  width: 60px;
+  background-color: #2b2b2b;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#left-panel .tool {
+  width: 40px;
+  height: 40px;
+  margin: 10px 0;
+  background-color: #3a3a3a;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#left-panel .tool:hover {
+  background-color: #505050;
+}
+
+/* Center Panel (Canvas and Adjustments) */
+#center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #252526;
+  overflow: hidden;
+}
+
+/* Canvas container now flexes to available space */
+#canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  background-color: #1e1e1e;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Adjustments area at bottom of center panel */
+#adjustments {
+  background-color: #2d2d2d;
+  padding: 10px;
+  display: flex;
+  gap: 20px;
+}
+
+.adjustment-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.adjustment-group label {
+  font-size: 0.9em;
+  min-width: 70px;
+}
+
+.adjustment-group input[type="range"] {
+  width: 150px;
+}
+
+/* Right Panels (Layers and History) */
+#right-panel {
+  width: 270px;
+  background-color: #2b2b2b;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+#right-panel h3 {
+  margin: 0 0 5px 0;
+  font-size: 1em;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+}
+
+#right-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#right-panel li {
+  background-color: #3a3a3a;
+  margin-bottom: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Bottom Status Bar */
+#status-bar {
+  background-color: #333;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  flex-shrink: 0;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #2e2e2e;
+  border-radius: 10px;
+  z-index: 9999;
+  width: 60%;
+  display: none;
+  height: 40%;
+  max-width: 1000px;
+  max-height: 400px;
+}
+
+.modal-header {
+  height: 40px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  max-height: 40px;
+  width: 100%;
+  border-bottom: 2px solid #1e1e1e;  /* Ensure the border is solid */
+}
+
+.modal-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #1e1e1e;
+  border: none;
+  border-radius: 10px;
+  color: #ddd;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2020ff;
+}
+
+#modal-close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 54px;
+    height: 54px;
+    border-top-right-radius: 10px;
+    background-color: #2e2e2e;
+    color: #ddd;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#modal-close-btn:hover {
+    background-color: red;
+}
+
+.ai-button {
+  padding: 10px 20px;
+  background-color: #2020ff;
+  color: #ddd;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.ai-button:hover {
+  background-color: transparent;
+  background-image: linear-gradient(45deg, red, red, yellow, yellow, green, green, blue, blue, purple, purple, orange, orange, red, red);
+  background-size: 400% 400%;
+  animation: spinGradient 5s linear infinite;
+}
+
+@keyframes spinGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #3a3a3a;
+  color: #ddd;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #2020ff;
+}
+
+/* Optional styles for tool selection */
+.tool {
+  cursor: pointer;
+  margin: 5px;
+  padding: 5px;
+  font-size: 1.5rem;
+}
+.tool.selected {
+  background-color: #ddd;
+}

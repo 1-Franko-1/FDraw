@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>FDraw</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Menu Bar with Custom Window Controls -->
+    <header id="menu-bar">
+      <ul class="menu-items">
+        <li>FDraw Prototype</li>
+        <li id="file-menu">
+          File
+          <ul id="file-dropdown" style="display: none;">
+            <li id="load-file">Load File</li>
+            <li id="save-file">Save File</li>
+          </ul>
+        </li>
+      </ul>
+      <div id="window-controls">
+        <button id="min-btn" title="Minimize">–</button>
+        <button id="max-btn" title="Maximize">⬜</button>
+        <button id="close-btn" title="Close">✖</button>
+      </div>
+    </header>
+    
+    <!-- Main Workspace -->
+    <div id="workspace">
+      <!-- Left Tools Panel (only draw and erase tools are available) -->
+      <aside id="left-panel">
+        <div class="tool" title="draw">✏️</div>
+        <div class="tool" title="erase">🧽</div>
+      </aside>
+      
+      <!-- Center Panel (Canvas and Adjustments) -->
+      <section id="center-panel">
+        <div id="canvas-container">
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="adjustments">
+          <!-- Pencil Thickness Adjustment (hidden by default) -->
+          <div id="pencil-adjustment" style="display: none;">
+            <label for="pencil-thickness">Pencil Thickness:</label>
+            <input type="range" id="pencil-thickness" min="1" max="20" value="2">
+          </div>
+          <!-- Additional adjustments can be added here -->
+        </div>
+      </section>
+      
+      <!-- Right Panels (Layers and History) -->
+      <aside id="right-panel">
+        <div id="layers-panel">
+          <button class="button" style="margin-bottom: 10px;" title="AI-Generator" id="ai-tool">✨</button>
+          <button class="button" style="margin-bottom: 10px;" title="Automatic Adjsutment" id="AJT-tool">🎨</button>
+          <div class="adjustment-group">
+            <label for="brightness">Brightness</label>
+            <input type="number" class="input" id="brightness" min="0" max="200" value="100">
+          </div>
+          <div class="adjustment-group">
+            <label for="contrast">Contrast</label>
+            <input type="number" class="input" id="contrast" min="0" max="200" value="100">
+          </div>
+          <div class="adjustment-group">
+            <label for="saturation">Saturation</label>
+            <input type="number" class="input" id="saturation" min="0" max="200" value="100">
+          </div>
+          <div class="adjustment-group">
+            <label for="hue">Hue</label>
+            <input type="number" class="input" id="hue" min="0" max="360" value="0">
+          </div>
+          <div class="adjustment-group">
+            <label for="sepia">Sepia</label>
+            <input type="number" class="input" id="sepia" min="0" max="100" value="0">
+          </div>
+          <div class="adjustment-group">
+            <label for="grayscale">Grayscale</label>
+            <input type="number" class="input" id="grayscale" min="0" max="100" value="0">
+          </div>
+          <div class="adjustment-group">
+            <label for="sharpness">Sharpness</label>
+            <input type="number" class="input" id="sharpness" min="0" max="5" value="0">
+          </div>
+
+        </div>
+      </aside>
+    </div>
+    
+    <!-- Bottom Status Bar -->
+    <footer id="status-bar">
+      <span id="status-text">Ready</span>
+      <span id="version-text" style="right: 0px;">Version: 0.2.3 Prototype</span>
+    </footer>
+    
+    <!-- AI Generator Modal -->
+    <div class="modal" id="ai-modal">
+      <div class="modal-header">
+        <p style="padding-left: 10px;">AI Image Generator ALPHA, NOT DONE!</p>
+        <button id="modal-close-btn" title="Close">✖</button>
+      </div>
+      <div class="modal-content">
+        <textarea class="input" type="text" style="height: 215px; resize: none;"></textarea>
+        <button class="ai-button" id="aigenerate">Generate</button>
+      </div>
+    </div>
+
+    <!-- Hidden File Input for Opening Images -->
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+    <a id="download-link" style="display: none;"></a>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
