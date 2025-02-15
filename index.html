@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>FDraw</title>
+  <title>FDraw Prototype</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -10,7 +10,7 @@
     <!-- Top Menu Bar with Custom Window Controls -->
     <header id="menu-bar">
       <ul class="menu-items">
-        <li>FDraw Prototype</li>
+        <li>FPhoto Prototype</li>
         <li id="file-menu">
           File
           <ul id="file-dropdown" style="display: none;">
@@ -55,16 +55,20 @@
           <button class="button" style="margin-bottom: 10px;" title="AI-Generator" id="ai-tool">✨</button>
           <button class="button" style="margin-bottom: 10px;" title="Automatic Adjsutment" id="AJT-tool">🎨</button>
           <div class="adjustment-group">
-            <label for="brightness">Brightness</label>
-            <input type="number" class="input" id="brightness" min="0" max="200" value="100">
+            <label for="sharpness">Sharpness</label>
+            <input type="number" class="input" id="sharpness" min="0" max="5" value="0">
+          </div>
+          <div class="adjustment-group">
+            <label for="saturation">Saturation</label>
+            <input type="number" class="input" id="saturation" min="0" max="200" value="100">
           </div>
           <div class="adjustment-group">
             <label for="contrast">Contrast</label>
             <input type="number" class="input" id="contrast" min="0" max="200" value="100">
           </div>
           <div class="adjustment-group">
-            <label for="saturation">Saturation</label>
-            <input type="number" class="input" id="saturation" min="0" max="200" value="100">
+            <label for="brightness">Brightness</label>
+            <input type="number" class="input" id="brightness" min="0" max="200" value="100">
           </div>
           <div class="adjustment-group">
             <label for="hue">Hue</label>
@@ -78,11 +82,6 @@
             <label for="grayscale">Grayscale</label>
             <input type="number" class="input" id="grayscale" min="0" max="100" value="0">
           </div>
-          <div class="adjustment-group">
-            <label for="sharpness">Sharpness</label>
-            <input type="number" class="input" id="sharpness" min="0" max="5" value="0">
-          </div>
-
         </div>
       </aside>
     </div>
@@ -90,18 +89,20 @@
     <!-- Bottom Status Bar -->
     <footer id="status-bar">
       <span id="status-text">Ready</span>
-      <span id="version-text" style="right: 0px;">Version: 0.2.3 Prototype</span>
+      <span id="version-text" style="right: 0px;">Version: 0.2.5 Prototype</span>
     </footer>
-    
+
     <!-- AI Generator Modal -->
-    <div class="modal" id="ai-modal">
-      <div class="modal-header">
-        <p style="padding-left: 10px;">AI Image Generator ALPHA, NOT DONE!</p>
-        <button id="modal-close-btn" title="Close">✖</button>
-      </div>
-      <div class="modal-content">
-        <textarea class="input" type="text" style="height: 215px; resize: none;"></textarea>
-        <button class="ai-button" id="aigenerate">Generate</button>
+    <div class="modal-conainer" id="ai-modal">
+      <div class="modal" id="ai-modal-content">
+        <div class="modal-header">
+          <p style="padding-left: 10px;">AI Image Generator</p>
+          <button id="modal-close-btn" title="Close">✖</button>
+        </div>
+        <div class="modal-content">
+          <textarea class="input" type="text" id="aiinput" style="height: 215px; resize: none;"></textarea>
+          <button class="ai-button" id="aigenerate">Generate</button>
+        </div>
       </div>
     </div>
 
@@ -109,6 +110,7 @@
     <input type="file" id="file-input" accept="image/*" style="display: none;">
     <a id="download-link" style="display: none;"></a>
   </div>
+
   <script src="renderer.js"></script>
 </body>
 </html>

@@ -11,6 +11,43 @@ modalCloseBtn.addEventListener('click', () => {
   document.getElementById('ai-modal').style.display = 'none';
 });
 
+document.getElementById('ai-modal').addEventListener('click', (event) => {
+  if (event.target === document.getElementById('ai-modal')) {
+    document.getElementById('ai-modal').style.display = 'none';
+  }
+});
+
+// === AI Image Generator ===
+document.getElementById('ai-tool').addEventListener('click', () => {
+  document.getElementById("ai-modal").style.display = "block";
+});
+
+document.getElementById('aigenerate').addEventListener('click', async () => {
+  document.getElementById('ai-modal').style.display = 'none';
+  
+  const aiInput = document.getElementById('aiinput').value.trim();
+  if (aiInput === '') {
+    statusText.textContent = 'Please enter a prompt.';
+    return;
+  }
+
+  const encodedPrompt = encodeURIComponent(aiInput);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
+
+  const img = new Image();
+  img.crossOrigin = "Anonymous";
+  img.src = imageUrl;
+
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    statusText.textContent = "Loaded AI-generated image.";
+  };
+
+  img.onerror = () => {
+    statusText.textContent = "Failed to load AI-generated image.";
+  };
+});
 
 // === Global Variables & Elements ===
 const fileInput    = document.getElementById('file-input');
@@ -33,8 +70,7 @@ const grayscaleSlider  = document.getElementById('grayscale');
 const sharpnessSlider  = document.getElementById('sharpness');
 
 let originalImage = new Image();
-let imageLoaded   = false;
-let pencilThickness = 2; // Default pencil thickness
+let imageLoaded = false;
 
 // === Undo/Redo Stacks & Functions ===
 const undoStack = [];
@@ -97,6 +133,32 @@ window.addEventListener('load', () => {
 
 // === Image Drawing with Adjustments ===
 const drawImage = () => {
+  // Clear canvas and fill with white.
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (originalImage.src) {
+    
+    if (zoomLevel === 1) {
+      // No zoom: draw the entire image scaled to the canvas.
+      ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+    } else {
+      // Zoom in: determine a source rectangle from the original image.
+      const srcWidth = originalImage.width / zoomLevel;
+      const srcHeight = originalImage.height / zoomLevel;
+      const srcX = (originalImage.width - srcWidth) / 2;
+      const srcY = (originalImage.height - srcHeight) / 2;
+      ctx.drawImage(originalImage,
+                    srcX, srcY, srcWidth, srcHeight, // Source rectangle.
+                    0, 0, canvas.width, canvas.height  // Destination fills the canvas.
+                   );
+    }
+    ctx.filter = 'none';
+  }
+
+};
+
+const update_filters = () => {
   // Convert slider values to CSS filter parameters.
   const brightness = brightnessSlider.value / 100;
   const contrast   = contrastSlider.value / 100;
@@ -104,30 +166,20 @@ const drawImage = () => {
   const hue        = hueSlider.value;
   const sepia      = sepiaSlider.value;
   const grayscale  = grayscaleSlider.value;
+  const sharpness  = sharpnessSlider.value / 100;
 
-  // Clear canvas and fill with white.
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.filter = `
+    brightness(${brightness})
+    contrast(${contrast})
+    saturate(${saturation})
+    hue-rotate(${hue}deg)
+    sepia(${sepia}%)
+    grayscale(${grayscale}%)
+  `;
 
-  if (originalImage.src) {
-    ctx.filter = `
-      brightness(${brightness})
-      contrast(${contrast})
-      saturate(${saturation})
-      hue-rotate(${hue}deg)
-      sepia(${sepia}%)
-      grayscale(${grayscale}%)
-    `;
-    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-    ctx.filter = 'none';
-  }
+  ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
 
-  // Apply sharpness using convolution if needed.
-  const sharpnessValue = parseFloat(sharpnessSlider.value);
-  if (sharpnessValue > 0) {
-    const sharpenedData = applySharpness(ctx, canvas.width, canvas.height, sharpnessValue);
-    ctx.putImageData(sharpenedData, 0, 0);
-  }
+  applySharpness(ctx, canvas.width, canvas.height, sharpness);
 };
 
 const applySharpness = (ctx, width, height, sharpness) => {
@@ -181,7 +233,7 @@ const applySharpness = (ctx, width, height, sharpness) => {
   return output;
 };
 
-sharpnessSlider.addEventListener('input', drawImage);
+sharpnessSlider.addEventListener('input', update_filters);
 
 // Update the base image from the current canvas content.
 const updateOriginalImage = () => {
@@ -212,6 +264,27 @@ document.getElementById('save-file').addEventListener('click', () => {
   fileDropdown.style.display = 'none';
 });
 
+// === Global Zoom Variables ===
+let baseCanvasWidth = canvas.width;
+let baseCanvasHeight = canvas.height;
+let maxCanvasWidth = baseCanvasWidth;
+let maxCanvasHeight = baseCanvasHeight;
+let zoomLevel = 1; // 1 = no zoom
+
+// Function to update max canvas size based on the container dimensions.
+const updateMaxCanvasSize = () => {
+  const container = document.getElementById('canvas-container');
+  if (container) {
+    const rect = container.getBoundingClientRect();
+    maxCanvasWidth = rect.width;
+    maxCanvasHeight = rect.height;
+  }
+};
+
+// Call updateMaxCanvasSize on page load and whenever needed.
+window.addEventListener('load', updateMaxCanvasSize);
+
+// Update these values when an image is loaded.
 fileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -221,6 +294,14 @@ fileInput.addEventListener('change', (e) => {
     originalImage.onload = () => {
       canvas.width = originalImage.width;
       canvas.height = originalImage.height;
+      // Update base size.
+      baseCanvasWidth = originalImage.width;
+      baseCanvasHeight = originalImage.height;
+      // Reset zoom level.
+      zoomLevel = 1;
+      // Update the maximum canvas size based on the container.
+      updateMaxCanvasSize();
+      
       imageLoaded = true;
       statusText.textContent = `Loaded: ${file.name} (${originalImage.width} x ${originalImage.height})`;
       drawImage();
@@ -230,11 +311,52 @@ fileInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// Attach adjustment events for all filter sliders.
-[brightnessSlider, contrastSlider, saturationSlider, hueSlider, sepiaSlider, grayscaleSlider].forEach(slider => {
-  slider.addEventListener('input', drawImage);
+canvas.addEventListener('wheel', (e) => {
+  if (e.ctrlKey) {
+    e.preventDefault(); // Prevent the default browser zoom behavior.
+    
+    const delta = e.deltaY;
+    
+    if (delta < 0) { // Zoom in
+      // Only increase canvas size if BOTH width and height are below the container's limits.
+      if (canvas.width < maxCanvasWidth && canvas.height < maxCanvasHeight) {
+        let newWidth = canvas.width * 1.1;
+        let newHeight = canvas.height * 1.1;
+        // Clamp to maximum allowed dimensions.
+        if (newWidth > maxCanvasWidth) newWidth = maxCanvasWidth;
+        if (newHeight > maxCanvasHeight) newHeight = maxCanvasHeight;
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+      } else {
+        // If either dimension is at its limit, increase the zoom level.
+        zoomLevel *= 1.1;
+      }
+    } else { // Zoom out
+      if (zoomLevel > 1) {
+        zoomLevel /= 1.1;
+        if (zoomLevel < 1) zoomLevel = 1;
+      } else if (canvas.width > baseCanvasWidth || canvas.height > baseCanvasHeight) {
+        // Shrink canvas size (if possible) when zoom level is at 1.
+        let newWidth = canvas.width / 1.1;
+        let newHeight = canvas.height / 1.1;
+        if (newWidth < baseCanvasWidth) newWidth = baseCanvasWidth;
+        if (newHeight < baseCanvasHeight) newHeight = baseCanvasHeight;
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+      }
+    }
+    drawImage();
+  }
 });
 
+// Attach adjustment events for all filter sliders.
+[brightnessSlider, contrastSlider, saturationSlider, hueSlider, sepiaSlider, grayscaleSlider].forEach(slider => {
+  slider.addEventListener('input', update_filters);
+});
+
+// === Pencil & Eraser Thickness Variables ===
+let pencilThickness = 2; // Default pencil thickness
+let eraserThickness = 10; // Default eraser thickness
 
 // === Pencil Thickness Slider (for drawing tool) ===
 const showPencilThicknessSlider = () => {
@@ -248,10 +370,20 @@ const showPencilThicknessSlider = () => {
   });
 };
 
-const hidePencilThicknessSlider = () => {
-  adjustmentsDiv.innerHTML = '';
+const showEraserThicknessSlider = () => {
+  adjustmentsDiv.innerHTML = `
+    <label for="eraser-thickness">Eraser Thickness:</label>
+    <input type="range" id="eraser-thickness" min="1" max="50" value="${eraserThickness}">
+  `;
+  document.getElementById('eraser-thickness').addEventListener('input', (e) => {
+    eraserThickness = e.target.value;
+    statusText.textContent = `Eraser Thickness: ${eraserThickness}`;
+  });
 };
 
+const hideThicknessSlider = () => {
+  adjustmentsDiv.innerHTML = '';
+};
 
 // === Tool Selection & Canvas Drawing ===
 let currentTool = null;  // "draw" or "erase"
@@ -267,7 +399,14 @@ toolElements.forEach(tool => {
     currentTool = tool.title; // Expected values: "draw" or "erase"
     statusText.textContent = `Tool Selected: ${currentTool}`;
     
-    currentTool === 'draw' ? showPencilThicknessSlider() : hidePencilThicknessSlider();
+    // Show the corresponding thickness slider.
+    if (currentTool === 'draw') {
+      showPencilThicknessSlider();
+    } else if (currentTool === 'erase') {
+      showEraserThicknessSlider();
+    } else {
+      hideThicknessSlider();
+    }
   });
 });
 
@@ -312,7 +451,7 @@ canvas.addEventListener('mousemove', (e) => {
     lastX = x;
     lastY = y;
   } else if (currentTool === 'erase' && isErasing) {
-    ctx.lineWidth = 10;
+    ctx.lineWidth = eraserThickness;
     ctx.lineCap   = 'round';
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
@@ -334,27 +473,6 @@ const endDrawing = () => {
 
 canvas.addEventListener('mouseup', endDrawing);
 canvas.addEventListener('mouseout', endDrawing);
-
-
-// === AI Image Generator ===
-document.getElementById('ai-tool').addEventListener('click', () => {
-  document.getElementById("ai-modal").style.display = "block";
-});
-
-document.getElementById('aigenerate').addEventListener('click', () => {
-  document.getElementById('ai-modal').style.display = 'none';
-  const aiImage = new Image();
-  aiImage.onload = () => {
-    // Center the AI-generated image.
-    const posX = (canvas.width / 2) - 50;
-    const posY = (canvas.height / 2) - 50;
-    ctx.drawImage(aiImage, posX, posY, 100, 100);
-    updateOriginalImage();
-    statusText.textContent = 'AI image pasted at center';
-  };
-  aiImage.src = 'https://via.placeholder.com/100x100';
-});
-
 
 // === Auto-Adjust Tool for Saturation & Sharpness ===
 let autoSaturationApplied = false;
